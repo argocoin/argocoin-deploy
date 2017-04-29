@@ -58,7 +58,7 @@ function install_ansible() {
 # Check Ansible
 function check_ansible() {
 	echo
-	echo '*** Ansible version:'
+	echo '*** Ansible version'
 	echo
 	ansible --version
 	ret=$?
@@ -68,9 +68,25 @@ function check_ansible() {
 	fi
 }
 
+# Create ssh keypair
+function create_ssh_keypair() {
+	echo
+	echo '*** Create Ssh keypair'
+	echo
+	sshPrivateKey="/home/$user/.ssh/id_rsa"
+	if [ -f "$sshPrivateKey" ]; then
+		echo "Ssh private key $sshPrivateKey exists"
+		return 0
+	fi
+
+	su -c 'ssh-keygen' $user
+	su -c 'ssh-copy-id' $user
+}
+
 turn_off_automatic_updates
 install_epel_repo
 install_ansible
 check_ansible
+create_ssh_keypair
 
 
