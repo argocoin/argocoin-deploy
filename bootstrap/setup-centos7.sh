@@ -71,7 +71,7 @@ function check_ansible() {
 # Create ssh keypair
 function create_ssh_keypair() {
 	echo
-	echo '*** Create Ssh keypair'
+	echo '*** Create ssh keypair'
 	echo
 	sshPrivateKey="/home/$user/.ssh/id_rsa"
 	if [ -f "$sshPrivateKey" ]; then
@@ -80,7 +80,33 @@ function create_ssh_keypair() {
 	fi
 
 	su -c 'ssh-keygen' $user
-	su -c 'ssh-copy-id' $user
+	authorizedKeys="/home/$user/.ssh/authorized_keys"
+	rm -f "$authorizedKeys"
+}
+
+function copy_ssh_keypair() {
+	echo
+	echo '*** Copy ssh keypair to localhost'
+	echo
+	sshPrivateKey="/home/$user/.ssh/id_rsa"
+	ssh-copy-id -i "$sshPrivateKey" "$user@localhost"
+}
+
+function add_localhost_to_ansible() {
+	echo
+	echo '*** Add localhost to ansible hosts file'
+	echo
+	ansibleHosts='/etc/ansible/hosts'
+	localhostEntry='localhost'
+	# http://stackoverflow.com/questions/3557037/appending-a-line-to-a-file-only-if-it-does-not-already-exist
+	grep -q -E "^$localhostEntry" "$ansibleHosts" || echo "$localhostEntry" >> "$ansibleHosts"
+}
+
+function run_ansible_ping() {
+	echo
+	echo '*** Run ansible ping'
+	echo
+	su -c 'ansible all -m ping' $user
 }
 
 turn_off_automatic_updates
@@ -88,5 +114,7 @@ install_epel_repo
 install_ansible
 check_ansible
 create_ssh_keypair
-
+copy_ssh_keypair
+add_localhost_to_ansible
+run_ansible_ping
 
