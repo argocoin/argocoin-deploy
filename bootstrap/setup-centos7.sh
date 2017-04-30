@@ -5,6 +5,29 @@ set -u
 
 user='tec'
 
+# Set Git email
+function set_git_email() {
+	echo
+	echo "*** Setting git email"
+	echo
+	gitUserEmail=$(su -c 'git config --global user.email' $user)
+	if [ -n "$gitUserEmail" ]; then
+		echo "Git email already set to $gitUserEmail"
+		return 0
+	fi
+		
+	gitUserEmail=''
+	read -p 'Enter git user email: ' gitUserEmail
+	if [ -z "$gitUserEmail" ]; then
+		echo "Not setting git user email"
+		return 0
+	fi
+		
+	echo "Setting git user email to $gitUserEmail"
+	su -c "git config --global user.email '$gitUserEmail'" $user
+}
+
+
 # Prompt to continue
 # http://stackoverflow.com/questions/3231804/in-bash-how-to-add-are-you-sure-y-n-to-any-command-or-alias
 function prompt_continue() {
@@ -109,6 +132,7 @@ function run_ansible_ping() {
 	su -c 'ansible all -m ping' $user
 }
 
+set_git_email
 turn_off_automatic_updates
 install_epel_repo
 install_ansible
