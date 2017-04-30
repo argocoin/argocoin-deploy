@@ -145,7 +145,10 @@ function add_localhost_to_ansible() {
 	ansibleHosts='/etc/ansible/hosts'
 	localhostEntry='localhost'
 	# http://stackoverflow.com/questions/3557037/appending-a-line-to-a-file-only-if-it-does-not-already-exist
-	grep -q -E "^$localhostEntry" "$ansibleHosts" || sudo echo "$localhostEntry" >> "$ansibleHosts"
+	if ! grep -q -E "^$localhostEntry" "$ansibleHosts" ; then
+		# http://stackoverflow.com/questions/82256/how-do-i-use-sudo-to-redirect-output-to-a-location-i-dont-have-permission-to-wr
+		echo "$localhostEntry" | sudo tee -a "$ansibleHosts" > /dev/null
+	fi
 }
 
 function run_ansible_ping() {
