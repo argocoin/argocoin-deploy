@@ -19,8 +19,11 @@ function add_to_sudo() {
 	echo "Adding user to sudo..."
 	su -c "gpasswd -a $USER wheel"
 
-	# https://unix.stackexchange.com/questions/224705/error-when-adding-user-to-wheel-group-in-centos-7
-	newgrp wheel
+	# https://superuser.com/questions/272061/reload-a-linux-users-group-assignments-without-logging-out
+	echo "Restart required..."
+	prompt_continue 'Do you want to continue?'
+	shutdown -r now
+	exit 0
 }
 
 
@@ -79,6 +82,7 @@ function turn_off_automatic_updates() {
 	echo "Restart required..."
 	prompt_continue 'Do you want to continue?'
 	shutdown -r now
+	exit 0
 }
 
 # Install EPEL repository
