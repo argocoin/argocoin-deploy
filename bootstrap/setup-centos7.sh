@@ -3,14 +3,33 @@
 # Error if variable is unassigned
 set -u
 
-user='tec'
+
+# Add to sudo
+function add_to_sudo() {
+	echo
+	echo "*** Adding user to sudo"
+	echo
+	sudo ls /etc >/dev/null
+	ret=$?
+	if [ $ret -eq 0 ]; then
+		echo "Already in sudo"
+		return 0
+	fi
+
+	echo "Adding user to sudo..."
+	su -c "gpasswd -a $USER wheel"
+
+	# https://unix.stackexchange.com/questions/224705/error-when-adding-user-to-wheel-group-in-centos-7
+	newgrp wheel
+}
+
 
 # Set Git email
 function set_git_email() {
 	echo
 	echo "*** Setting git email"
 	echo
-	gitUserEmail=$(su -c 'git config --global user.email' $user)
+	gitUserEmail=$(git config --global user.email)
 	if [ -n "$gitUserEmail" ]; then
 		echo "Git email already set to $gitUserEmail"
 		return 0
@@ -24,7 +43,7 @@ function set_git_email() {
 	fi
 		
 	echo "Setting git user email to $gitUserEmail"
-	su -c "git config --global user.email '$gitUserEmail'" $user
+	git config --global user.email '$gitUserEmail'
 }
 
 
@@ -46,17 +65,17 @@ function prompt_continue() {
 # Turn off automatic updates
 function turn_off_automatic_updates() {
 	echo
-	echo "*** Turning off automatic updates for user $user"
+	echo "*** Turning off automatic updates"
 	echo
-	automaticUpdates=$(su -c 'gsettings get org.gnome.software download-updates' $user)
+	automaticUpdates=$(gsettings get org.gnome.software download-updates)
 	if [[ "$automaticUpdates" =~ false ]]; then
-		echo "Automatic updates are off for user $user"
+		echo "Automatic updates are off"
 		return 0
 	fi
 
-	echo "Turning off automatic updates for user $user"
+	echo "Turning off automatic updates"
 
-	su -c 'gsettings set org.gnome.software download-updates false' $user
+	gsettings set org.gnome.software download-updates false
 	echo "Restart required..."
 	prompt_continue 'Do you want to continue?'
 	shutdown -r now
@@ -67,7 +86,7 @@ function install_epel_repo() {
 	echo
 	echo '*** Installing EPEL repo'
 	echo
-	yum install epel-release
+	sudo yum install epel-release
 }
 
 # Install Ansible
@@ -75,7 +94,7 @@ function install_ansible() {
 	echo
 	echo '*** Installing ansible'
 	echo
-	yum install ansible
+	sudo yum install ansible
 }
 
 # Check Ansible
@@ -96,14 +115,14 @@ function create_ssh_keypair() {
 	echo
 	echo '*** Create ssh keypair'
 	echo
-	sshPrivateKey="/home/$user/.ssh/id_rsa"
+	sshPrivateKey="$HOME/.ssh/id_rsa"
 	if [ -f "$sshPrivateKey" ]; then
 		echo "Ssh private key $sshPrivateKey exists"
 		return 0
 	fi
 
-	su -c 'ssh-keygen' $user
-	authorizedKeys="/home/$user/.ssh/authorized_keys"
+	ssh-keygen
+	authorizedKeys="$HOME/.ssh/authorized_keys"
 	rm -f "$authorizedKeys"
 }
 
@@ -111,8 +130,8 @@ function copy_ssh_keypair() {
 	echo
 	echo '*** Copy ssh keypair to localhost'
 	echo
-	sshPrivateKey="/home/$user/.ssh/id_rsa"
-	ssh-copy-id -i "$sshPrivateKey" "$user@localhost"
+	sshPrivateKey="$HOME/.ssh/id_rsa"
+	ssh-copy-id -i "$sshPrivateKey" localhost
 }
 
 function add_localhost_to_ansible() {
@@ -122,16 +141,17 @@ function add_localhost_to_ansible() {
 	ansibleHosts='/etc/ansible/hosts'
 	localhostEntry='localhost'
 	# http://stackoverflow.com/questions/3557037/appending-a-line-to-a-file-only-if-it-does-not-already-exist
-	grep -q -E "^$localhostEntry" "$ansibleHosts" || echo "$localhostEntry" >> "$ansibleHosts"
+	grep -q -E "^$localhostEntry" "$ansibleHosts" || sudo echo "$localhostEntry" >> "$ansibleHosts"
 }
 
 function run_ansible_ping() {
 	echo
 	echo '*** Run ansible ping'
 	echo
-	su -c 'ansible all -m ping' $user
+	ansible all -m ping
 }
 
+add_to_sudo
 set_git_email
 turn_off_automatic_updates
 install_epel_repo
