@@ -1,5 +1,5 @@
 # ansible hosts file
-/inventories/services/other
+/ansible/inventories/service/other/
 
 # vim temp files
 .*.sw?
