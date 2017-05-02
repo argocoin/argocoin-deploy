@@ -46,7 +46,7 @@ function set_git_email() {
 	fi
 		
 	echo "Setting git user email to $gitUserEmail"
-	git config --global user.email '$gitUserEmail'
+	git config --global user.email "$gitUserEmail"
 }
 
 
