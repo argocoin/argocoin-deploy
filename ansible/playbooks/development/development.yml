@@ -1,0 +1,7 @@
+---
+- hosts: development
+  roles:
+    - vim-yml
+    - get-disk-space
+    - yum-update
+

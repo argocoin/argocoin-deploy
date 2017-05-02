@@ -1,0 +1,8 @@
+---
+- name: get disk space
+  command: df -h
+  register: result
+
+- name: print disk space
+  debug: var=result.stdout_lines
+

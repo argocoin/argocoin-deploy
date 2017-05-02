@@ -1,0 +1,7 @@
+---
+- name: Create ftplugin directory
+  file: path=~/.vim/ftplugin state=directory
+
+- name: Copy vim yml filetype
+  copy: src=files/filetype-yml.vim dest=~/.vim/ftplugin/yaml.vim
+
