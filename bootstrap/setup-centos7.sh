@@ -26,15 +26,14 @@ function add_to_sudo() {
 	exit 0
 }
 
-
 # Set Git email
 function set_git_email() {
 	echo
-	echo "*** Setting git email"
+	echo "*** Setting git user email"
 	echo
 	gitUserEmail=$(git config --global user.email)
 	if [ -n "$gitUserEmail" ]; then
-		echo "Git email already set to $gitUserEmail"
+		echo "Git user email already set to $gitUserEmail"
 		return 0
 	fi
 		
@@ -47,6 +46,28 @@ function set_git_email() {
 		
 	echo "Setting git user email to $gitUserEmail"
 	git config --global user.email "$gitUserEmail"
+}
+
+# Set Git name
+function set_git_name() {
+	echo
+	echo "*** Setting git user name"
+	echo
+	gitUserName=$(git config --global user.name)
+	if [ -n "$gitUserName" ]; then
+		echo "Git user name already set to $gitUserName"
+		return 0
+	fi
+		
+	gitUserName=''
+	read -p 'Enter git user name: ' gitUserName
+	if [ -z "$gitUserName" ]; then
+		echo "Not setting git user name"
+		return 0
+	fi
+		
+	echo "Setting git user name to $gitUserName"
+	git config --global user.name "$gitUserName"
 }
 
 
@@ -160,6 +181,7 @@ function run_ansible_ping() {
 
 add_to_sudo
 set_git_email
+set_git_name
 turn_off_automatic_updates
 install_epel_repo
 install_ansible
