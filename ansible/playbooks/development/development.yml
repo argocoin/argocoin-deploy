@@ -1,7 +1,13 @@
 ---
 - hosts: development
+  become: yes
+  roles:
+    - vim-install
+    - yum-update
+
+- hosts: development
   roles:
     - vim-yml
+    - vim-configure
     - get-disk-space
-    - yum-update
 
