@@ -4,6 +4,8 @@
   roles:
     - vim-install
     - yum-update
+    - xfce-install
+    - php7-install
 
 - hosts: development
   roles:

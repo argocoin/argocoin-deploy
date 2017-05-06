@@ -1,0 +1,77 @@
+---
+- name: install centos software collections
+  yum: name=centos-release-scl state=present
+
+- name: install Apache 2.4
+  yum: name={{ item }} state=present
+  with_items:
+  - httpd24
+  - httpd24-mod_ssl
+
+- name: install PHP 7
+  yum: name={{ item }} state=present
+  with_items:
+  - rh-php56
+  - rh-php56-php
+  - rh-php56-php-pear
+  - rh-php56-php-mysqlnd
+  - rh-php56-php-cli
+  - rh-php56-php-common
+  - rh-php56-php-pdo
+  - rh-php56-php-mbstring
+  - rh-php56-php-bcmath
+
+- name: install MySQL 5.6
+  yum: name=rh-mysql56 state=present
+
+- name: Add software collections paths so that they are sourced by all users
+  copy:
+    src: files/argocoin-sc.sh
+    dest: /etc/profile.d/
+    mode: 0644
+
+
+- name: Make /etc/php56.ini a symlink to true ini file
+  file:
+    src: /etc/opt/rh/rh-php56/php.ini
+    dest: /etc/php56.ini
+    state: link
+    force: yes
+
+- name: Create /etc/httpd24 symlink
+  file:
+    src: /opt/rh/httpd24/root/etc/httpd
+    dest: /etc/httpd24
+    state: link
+    force: yes
+
+- name: create /var/www/html directory
+  file:
+    path: /var/www/html
+    state: directory
+    recurse: yes
+    mode: 0755
+
+- name: change DocumentRoot to /var/www/html in /etc/httpd24/conf/httpd.conf
+  lineinfile:
+    path: /etc/httpd24/conf/httpd.conf
+    regexp: '^DocumentRoot (?!/var/www/html")'
+    line: 'DocumentRoot "/var/www/html"'
+    state: present
+    backrefs: yes
+  notify: restart apache
+
+- name: start apache
+  service:
+    name: httpd24-httpd
+    state: started
+    enabled: yes
+
+- name: start mysql server
+  service:
+    name: rh-mysql56-mysqld
+    state: started
+    enabled: yes
+
+
+

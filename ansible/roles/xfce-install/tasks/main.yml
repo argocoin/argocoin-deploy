@@ -1,0 +1,6 @@
+---
+- name: xfce install
+  yum:
+    name: '@xfce'
+    state: present
+
