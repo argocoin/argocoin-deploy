@@ -6,6 +6,8 @@
     - yum-update
     - xfce-install
     - php7-install
+    - docker-install
+    - ansible-container-install
 
 - hosts: development
   roles:
