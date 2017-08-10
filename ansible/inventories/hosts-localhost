@@ -1,6 +1,6 @@
 [development-core]
 localhost
 
-#[development-core]
+#[development-extra]
 #localhost
 
