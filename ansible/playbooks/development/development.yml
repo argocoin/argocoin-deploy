@@ -1,15 +1,19 @@
 ---
-- hosts: development
+- hosts: development-core
   become: yes
   roles:
     - vim-install
     - yum-update
     - xfce-install
+
+- hosts: development-extra
+  become: yes
+  roles:
     - php7-install
     - docker-install
     - ansible-container-install
 
-- hosts: development
+- hosts: development-core
   roles:
     - vim-yml
     - vim-configure
